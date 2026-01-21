@@ -59,3 +59,10 @@ Open [http://localhost:3000](http://localhost:3000) to begin your ceremony.
 ## Technical Foundation
 
 Built with [Next.js](https://nextjs.org) and intention.
+
+---
+
+## Links
+
+- **Live**: [spirit-messenger.vercel.app](https://vercel.com/bugilo/spirit-messenger)
+- **Firebase Console**: [Realtime Database](https://console.firebase.google.com/u/0/project/spirit-messenger/database/spirit-messenger-default-rtdb)

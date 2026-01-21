@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { usePresence } from "@/lib/usePresence";
 
 interface CeremonyState {
   heartbeat: number; // Numbers per second (1-10)
@@ -125,6 +126,9 @@ export default function Home() {
   const [isInitialized, setIsInitialized] = useState(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const utterancesEndRef = useRef<HTMLDivElement>(null);
+
+  // Track souls online
+  const { soulsOnline, isConnected } = usePresence();
 
   // Load lexicon
   useEffect(() => {
@@ -253,7 +257,16 @@ export default function Home() {
   return (
     <div className="h-screen bg-black text-white flex flex-col overflow-hidden">
       {/* Top Row - Header */}
-      <header className="shrink-0 h-16 flex items-center justify-end px-4">
+      <header className="shrink-0 h-16 flex items-center justify-between px-4">
+        {/* Souls Counter */}
+        <div className="flex items-center gap-2 text-white/60">
+          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-white/30'}`} />
+          <span className="text-sm">
+            {soulsOnline} {soulsOnline === 1 ? 'soul' : 'souls'} online
+          </span>
+        </div>
+
+        {/* Settings Button */}
         <button
           onClick={() => setShowSettings(!showSettings)}
           className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
