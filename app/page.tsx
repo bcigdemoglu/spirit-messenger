@@ -9,6 +9,8 @@ interface CeremonyState {
   witnesses: number; // Number of parallel channels (1-5)
   frequencies: string[]; // Numeric patterns to scan for
   utterances: number[]; // Word indices (0-9999)
+  entangleFrequencies: boolean; // ALL frequencies must match (true) or ANY (false)
+  entangleWitnesses: boolean; // Must appear in ALL witnesses (true) or ANY (false)
 }
 
 const DEFAULT_STATE: CeremonyState = {
@@ -17,6 +19,8 @@ const DEFAULT_STATE: CeremonyState = {
   witnesses: 1,
   frequencies: ["528"],
   utterances: [],
+  entangleFrequencies: true,
+  entangleWitnesses: true,
 };
 
 // Encode utterances to URL-safe base64 (2 bytes per index)
@@ -68,6 +72,8 @@ function encodeStateToURL(state: CeremonyState): string {
   if (state.utterances.length > 0) {
     params.set("p", encodeUtterances(state.utterances));
   }
+  params.set("ef", state.entangleFrequencies ? "1" : "0");
+  params.set("ew", state.entangleWitnesses ? "1" : "0");
   return params.toString();
 }
 
@@ -90,6 +96,12 @@ function decodeStateFromURL(search: string): Partial<CeremonyState> {
 
   const p = params.get("p");
   if (p) state.utterances = decodeUtterances(p);
+
+  const ef = params.get("ef");
+  if (ef !== null) state.entangleFrequencies = ef === "1";
+
+  const ew = params.get("ew");
+  if (ew !== null) state.entangleWitnesses = ew === "1";
 
   return state;
 }
@@ -192,9 +204,12 @@ export default function Home() {
     // Update current veils for display
     setCurrentVeils(veils);
 
-    // Check if ALL frequencies appear in ALL witnesses
-    const aligned = state.frequencies.every((freq) =>
-      veils.every((veil) => frequencyInVeil(freq, veil))
+    // Check alignment based on entanglement settings
+    const frequencyMethod = state.entangleFrequencies ? 'every' : 'some';
+    const witnessMethod = state.entangleWitnesses ? 'every' : 'some';
+
+    const aligned = state.frequencies[frequencyMethod]((freq) =>
+      veils[witnessMethod]((veil) => frequencyInVeil(freq, veil))
     );
 
     if (aligned) {
@@ -205,7 +220,7 @@ export default function Home() {
         utterances: [...prev.utterances, utteranceIndex],
       }));
     }
-  }, [lexicon, state.frequencies, state.witnesses, state.aperture]);
+  }, [lexicon, state.frequencies, state.witnesses, state.aperture, state.entangleFrequencies, state.entangleWitnesses]);
 
   // Start/stop ceremony
   useEffect(() => {
@@ -301,14 +316,14 @@ export default function Home() {
       {/* Settings Panel */}
       {showSettings && (
         <div className="fixed inset-0 z-40 bg-black/90 p-6 overflow-auto">
-          <div className="max-w-md mx-auto pt-16 space-y-8">
-            <h2 className="text-2xl font-light tracking-wide">
+          <div className="max-w-md mx-auto pt-16 space-y-6">
+            <h2 className="text-xl font-light tracking-wide">
               Ceremony Settings
             </h2>
 
             {/* Heartbeat */}
             <div className="space-y-2">
-              <label className="block text-sm text-white/60">
+              <label className="block text-xs text-white/60">
                 Heartbeat ({state.heartbeat} per second)
               </label>
               <input
@@ -328,7 +343,7 @@ export default function Home() {
 
             {/* Aperture */}
             <div className="space-y-2">
-              <label className="block text-sm text-white/60">
+              <label className="block text-xs text-white/60">
                 Aperture ({state.aperture} digits)
               </label>
               <input
@@ -348,7 +363,7 @@ export default function Home() {
 
             {/* Witnesses */}
             <div className="space-y-2">
-              <label className="block text-sm text-white/60">
+              <label className="block text-xs text-white/60">
                 Witnesses ({state.witnesses})
               </label>
               <input
@@ -368,18 +383,18 @@ export default function Home() {
 
             {/* Frequencies */}
             <div className="space-y-4">
-              <label className="block text-sm text-white/60">Frequencies</label>
+              <label className="block text-xs text-white/60">Frequencies</label>
 
               <div className="flex flex-wrap gap-2">
                 {state.frequencies.map((freq, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full"
+                    className="flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-xs"
                   >
                     <span>{freq}</span>
                     <button
                       onClick={() => handleRemoveFrequency(index)}
-                      className="text-white/60 hover:text-white"
+                      className="text-white/60 hover:text-white text-sm"
                     >
                       ×
                     </button>
@@ -395,22 +410,61 @@ export default function Home() {
                     setNewFrequency(e.target.value.replace(/\D/g, ""))
                   }
                   placeholder="Enter frequency..."
-                  className="flex-1 bg-white/10 px-4 py-2 rounded-lg focus:outline-none focus:ring-1 focus:ring-white/30"
+                  className="flex-1 bg-white/10 px-3 py-2 text-xs rounded-lg focus:outline-none focus:ring-1 focus:ring-white/30"
                   onKeyDown={(e) => e.key === "Enter" && handleAddFrequency()}
                 />
                 <button
                   onClick={handleAddFrequency}
-                  className="px-4 py-2 bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
+                  className="px-4 py-2 text-xs bg-white/20 rounded-lg hover:bg-white/30 transition-colors"
                 >
                   Add
                 </button>
               </div>
 
               {newFrequency.length > state.aperture && (
-                <p className="text-red-400 text-sm">
+                <p className="text-red-400 text-xs">
                   Frequency length cannot exceed aperture ({state.aperture})
                 </p>
               )}
+            </div>
+
+            {/* Entanglement Options */}
+            <div className="space-y-3">
+              <label className="block text-xs text-white/60">Entanglement</label>
+
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={state.entangleFrequencies}
+                  onChange={(e) =>
+                    setState((prev) => ({
+                      ...prev,
+                      entangleFrequencies: e.target.checked,
+                    }))
+                  }
+                  className="w-4 h-4 accent-white"
+                />
+                <span className="text-xs">
+                  Entangle frequencies (ALL must match)
+                </span>
+              </label>
+
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={state.entangleWitnesses}
+                  onChange={(e) =>
+                    setState((prev) => ({
+                      ...prev,
+                      entangleWitnesses: e.target.checked,
+                    }))
+                  }
+                  className="w-4 h-4 accent-white"
+                />
+                <span className="text-xs">
+                  Entangle witnesses (must appear in ALL)
+                </span>
+              </label>
             </div>
 
             <div className="flex gap-3">
@@ -421,13 +475,13 @@ export default function Home() {
                     utterances: prev.utterances,
                   }));
                 }}
-                className="flex-1 py-3 bg-red-500/20 rounded-lg hover:bg-red-500/30 transition-colors text-red-300"
+                className="flex-1 py-2.5 text-xs bg-red-500/20 rounded-lg hover:bg-red-500/30 transition-colors text-red-300"
               >
                 Reset
               </button>
               <button
                 onClick={() => setShowSettings(false)}
-                className="flex-1 py-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+                className="flex-1 py-2.5 text-xs bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
               >
                 Close
               </button>
