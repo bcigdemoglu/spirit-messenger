@@ -14,7 +14,7 @@ interface CeremonyState {
 }
 
 const DEFAULT_STATE: CeremonyState = {
-  heartbeat: 2,
+  heartbeat: 10,
   aperture: 10,
   witnesses: 1,
   frequencies: ["528"],
@@ -329,7 +329,7 @@ export default function Home() {
               <input
                 type="range"
                 min="1"
-                max="30"
+                max="60"
                 value={state.heartbeat}
                 onChange={(e) =>
                   setState((prev) => ({
