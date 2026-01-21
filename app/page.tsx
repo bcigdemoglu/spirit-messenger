@@ -19,8 +19,8 @@ const DEFAULT_STATE: CeremonyState = {
   witnesses: 1,
   frequencies: ["528"],
   utterances: [],
-  entangleFrequencies: true,
-  entangleWitnesses: true,
+  entangleFrequencies: false,
+  entangleWitnesses: false,
 };
 
 // Encode utterances to URL-safe base64 (2 bytes per index)
