@@ -30,18 +30,18 @@ body {
 /* Breathing dots animation */
 .breathing-dots {
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.2em;
+  align-items: flex-end;
+  gap: 0.15em;
+  vertical-align: bottom;
+  padding-bottom: 0.25em;
 }
 
 .breathing-dots .dot {
-  width: 0.2em;
-  height: 0.2em;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background-color: currentColor;
   animation: breathe 4s ease-in-out infinite;
-  vertical-align: baseline;
-  margin-bottom: 0.15em;
 }
 
 .breathing-dots .dot:nth-child(1) {
