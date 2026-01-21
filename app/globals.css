@@ -26,3 +26,43 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Breathing dots animation */
+.breathing-dots {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.2em;
+}
+
+.breathing-dots .dot {
+  width: 0.2em;
+  height: 0.2em;
+  border-radius: 50%;
+  background-color: currentColor;
+  animation: breathe 4s ease-in-out infinite;
+  vertical-align: baseline;
+  margin-bottom: 0.15em;
+}
+
+.breathing-dots .dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.breathing-dots .dot:nth-child(2) {
+  animation-delay: 0.6s;
+}
+
+.breathing-dots .dot:nth-child(3) {
+  animation-delay: 1.2s;
+}
+
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(0.5);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

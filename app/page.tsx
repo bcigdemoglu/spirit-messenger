@@ -260,9 +260,18 @@ export default function Home() {
       <header className="shrink-0 h-16 flex items-center justify-between px-4">
         {/* Souls Counter */}
         <div className="flex items-center gap-2 text-white/60">
-          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-white/30'}`} />
+          <div
+            className={`w-2.5 h-2.5 rounded-full ${
+              isConnected
+                ? 'bg-amber-400 animate-pulse shadow-[0_0_8px_rgba(251,191,36,0.6)]'
+                : 'bg-white/30'
+            }`}
+          />
           <span className="text-sm">
-            {soulsOnline} {soulsOnline === 1 ? 'soul' : 'souls'} online
+            {soulsOnline <= 1
+              ? "Channeling alone"
+              : `${soulsOnline - 1} ${soulsOnline === 2 ? 'soul' : 'souls'} also channeling`
+            }
           </span>
         </div>
 
@@ -404,12 +413,25 @@ export default function Home() {
               )}
             </div>
 
-            <button
-              onClick={() => setShowSettings(false)}
-              className="w-full py-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
-            >
-              Close
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setState((prev) => ({
+                    ...DEFAULT_STATE,
+                    utterances: prev.utterances,
+                  }));
+                }}
+                className="flex-1 py-3 bg-red-500/20 rounded-lg hover:bg-red-500/30 transition-colors text-red-300"
+              >
+                Reset
+              </button>
+              <button
+                onClick={() => setShowSettings(false)}
+                className="flex-1 py-3 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -419,14 +441,30 @@ export default function Home() {
         <div className="max-w-2xl w-full h-full flex items-center justify-center">
           <div className="w-full text-center hide-scrollbar overflow-y-auto max-h-full py-4">
             {words.length === 0 ? (
-              <p className="text-white/30 text-lg">
-                {state.frequencies.length === 0
-                  ? "Add a frequency to begin"
-                  : "Awaiting alignment..."}
-              </p>
+              // No words yet
+              state.frequencies.length === 0 ? (
+                <p className="text-white/30 text-lg">Add a frequency to begin</p>
+              ) : isPlaying ? (
+                // Playing but no words - golden breathing dots
+                <span className="breathing-dots text-xl text-amber-400">
+                  <span className="dot" />
+                  <span className="dot" />
+                  <span className="dot" />
+                </span>
+              ) : (
+                <p className="text-white/30 text-lg">Awaiting alignment...</p>
+              )
             ) : (
+              // Has words
               <p className="text-xl leading-relaxed tracking-wide">
                 {words.join(" ")}
+                {isPlaying && (
+                  <span className="breathing-dots text-amber-400 ml-2 align-middle">
+                    <span className="dot" />
+                    <span className="dot" />
+                    <span className="dot" />
+                  </span>
+                )}
               </p>
             )}
             <div ref={utterancesEndRef} />
@@ -475,6 +513,7 @@ export default function Home() {
           className="px-6 py-3 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
           aria-label="Clear"
         >
+          {/* Spiral - return to center, renewal */}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="24"
@@ -486,9 +525,7 @@ export default function Home() {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d="M3 6h18" />
-            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+            <path d="M12 12c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3c0 2.76-2.24 5-5 5s-5-2.24-5-5 2.24-5 5-5c3.87 0 7 3.13 7 7s-3.13 7-7 7-7-3.13-7-7" />
           </svg>
         </button>
 
